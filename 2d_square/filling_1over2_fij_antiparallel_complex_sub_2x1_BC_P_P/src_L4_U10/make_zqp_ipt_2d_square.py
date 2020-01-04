@@ -181,13 +181,13 @@ def calc_vmcfij(Lx,Ly,Lsub,fij):
             sitey = y%Ly
             site = sitey*(2*Lx) + sitex
             vmcfij[sub1,sitey,sitex] = fij[y,x,1,2]
-            print("a_up,a_dn",sub1,sitey,sitex,site,fij[y,x,1,2])
+            print("b_up,a_dn",sub1,sitey,sitex,site,fij[y,x,1,2])
             sub2 = 1
             sitex = (2*x+y+sub2-sub1+(2*Lx))%(2*Lx)
             sitey = y%Ly
             site = sitey*(2*Lx) + sitex
             vmcfij[sub1,sitey,sitex] = fij[y,x,1,3]
-            print("a_up,b_dn",sub1,sitey,sitex,site,fij[y,x,1,3])
+            print("b_up,b_dn",sub1,sitey,sitex,site,fij[y,x,1,3])
     return vmcfij
 
 
