@@ -1,51 +1,51 @@
-All                         [0]      4.46280
-Initialization              [1]      0.08908
-  read options             [10]      0.00024
-  ReadDefFile              [11]      0.02331
-  SetMemory                [12]      0.00038
-  InitParameter            [13]      0.00422
-VMCParaOpt                  [2]      4.37372
-  VMCMakeSample             [3]      3.19168
-    makeInitialSample      [30]      0.01190
-    make candidate         [31]      0.19625
-    hopping update         [32]      1.04664
-      UpdateProjCnt        [60]      0.12600
-      CalculateNewPfM2     [61]      0.32061
-      CalculateLogIP       [62]      0.15732
-      UpdateMAll           [63]      0.02499
-    exchange update        [33]      1.54250
-      UpdateProjCnt        [65]      0.15139
-      CalculateNewPfMTwo2  [66]      0.81507
-      CalculateLogIP       [67]      0.14946
-      UpdateMAllTwo        [68]      0.00808
+All                         [0]      1.50421
+Initialization              [1]      0.02680
+  read options             [10]      0.00039
+  ReadDefFile              [11]      0.02056
+  SetMemory                [12]      0.00018
+  InitParameter            [13]      0.00205
+VMCParaOpt                  [2]      1.47741
+  VMCMakeSample             [3]      0.60145
+    makeInitialSample      [30]      0.00623
+    make candidate         [31]      0.01836
+    hopping update         [32]      0.13768
+      UpdateProjCnt        [60]      0.03004
+      CalculateNewPfM2     [61]      0.05051
+      CalculateLogIP       [62]      0.01833
+      UpdateMAll           [63]      0.00901
+    exchange update        [33]      0.40663
+      UpdateProjCnt        [65]      0.05137
+      CalculateNewPfMTwo2  [66]      0.30333
+      CalculateLogIP       [67]      0.01881
+      UpdateMAllTwo        [68]      0.00233
     lspinflip update       [36]      0.00000
       UpdateProjCnt       [600]      0.00000
       CalculateNewPfMTwo2 [601]      0.00000
       CalculateLogIP      [602]      0.00000
       UpdateMAllTwo       [603]      0.00000
-    recal PfM and InvM     [34]      0.00432
-    save electron config   [35]      0.00811
-  VMCMainCal                [4]      1.12888
-    CalculateMAll          [40]      0.40786
-    LocEnergyCal           [41]      0.35542
-      CalHamiltonian0      [70]      0.00788
-      CalHamiltonian1      [71]      0.29008
-      CalHamiltonian2      [72]      0.00704
-    ReturnSlaterElmDiff    [42]      0.08400
-    calculate OO and HO    [43]      0.02810
-    multiply store OO      [45]      0.22387
-  StochasticOpt             [5]      0.03786
-    preprocess             [50]      0.00006
-    stcOptMain             [51]      0.03761
+    recal PfM and InvM     [34]      0.00434
+    save electron config   [35]      0.00223
+  VMCMainCal                [4]      0.86788
+    CalculateMAll          [40]      0.46406
+    LocEnergyCal           [41]      0.23843
+      CalHamiltonian0      [70]      0.00306
+      CalHamiltonian1      [71]      0.21964
+      CalHamiltonian2      [72]      0.00077
+    ReturnSlaterElmDiff    [42]      0.05024
+    calculate OO and HO    [43]      0.00992
+    multiply store OO      [45]      0.10007
+  StochasticOpt             [5]      0.00233
+    preprocess             [50]      0.00002
+    stcOptMain             [51]      0.00224
       initBLACS            [55]      0.00000
       calculate S and g    [56]      0.00000
       DPOSV                [57]      0.00000
       gatherParaChange     [58]      0.00000
-    postprocess            [52]      0.00011
-  UpdateSlaterElm          [20]      0.00021
+    postprocess            [52]      0.00005
+  UpdateSlaterElm          [20]      0.00018
   WeightAverage            [21]      0.00030
-  outputData               [22]      0.00300
-  SyncModifiedParameter    [23]      0.00013
-  cal                      [24]      0.00083
-  SR                       [25]      0.00024
+  outputData               [22]      0.00062
+  SyncModifiedParameter    [23]      0.00003
+  cal                      [24]      0.00066
+  SR                       [25]      0.00025
   MAll                     [69]      0.00000

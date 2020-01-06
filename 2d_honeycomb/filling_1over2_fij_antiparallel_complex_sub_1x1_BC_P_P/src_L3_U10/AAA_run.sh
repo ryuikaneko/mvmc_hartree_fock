@@ -1,9 +1,11 @@
 #!/bin/bash
 
-prog1=vmcdry
-prog2=vmc
+#prog1=vmcdry
+#prog2=vmc
 #prog1=./vmcdry.out
 #prog2=./vmc.out
+prog1=../../../bin/vmcdry.out
+prog2=../../../bin/vmc.out
 
 L=3
 U=10.0
