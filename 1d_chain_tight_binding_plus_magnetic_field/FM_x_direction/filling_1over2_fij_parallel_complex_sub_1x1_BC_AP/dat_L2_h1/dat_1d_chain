@@ -1,0 +1,2 @@
+# Lx filling(=n/2) BCx h num_electrons(=nup+ndown) chemi_potential ene ene_dens gap shell_cond
+2 0.5 AP 1.0 2 -1.11022302463e-16 -1.0 -0.5 1.0 closed
