@@ -31,7 +31,7 @@
     [Tahara-Imada DOI:10.1143/JPSJ.77.114701](https://doi.org/10.1143/JPSJ.77.114701)
 
 * Spin singlet and triplet mixing case (such as inplane collinear magnet, noncollinear magnet, ...)
-  * Pfaffian wave functions (the spin Jastrow factor imroves the energy more than the Slater type)
+  * Pfaffian wave functions (the spin Jastrow factor improves the energy more than the Slater type)
   * See
     [Lugas-Spanu-Becca-Sorella DOI:10.1103/PhysRevB.74.165122](https://doi.org/10.1103/PhysRevB.74.165122),
     [Spanu-Lugas-Becca-Sorella DOI:10.1103/PhysRevB.77.024510](https://doi.org/10.1103/PhysRevB.77.024510),
