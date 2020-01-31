@@ -35,5 +35,6 @@
   * See
     [Lugas-Spanu-Becca-Sorella DOI:10.1103/PhysRevB.74.165122](https://doi.org/10.1103/PhysRevB.74.165122),
     [Spanu-Lugas-Becca-Sorella DOI:10.1103/PhysRevB.77.024510](https://doi.org/10.1103/PhysRevB.77.024510),
+    [Bajdich-Mitas-Wagner-Schmidt DOI:10.1103/PhysRevB.77.115112](https://doi.org/10.1103/PhysRevB.77.115112),
     [Heidarian-Sorella-Becca DOI:10.1103/PhysRevB.80.012404](https://doi.org/10.1103/PhysRevB.80.012404)
     
