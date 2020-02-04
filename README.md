@@ -9,13 +9,15 @@
 * Lattices and assumed orders
   * 1D
     * Chain
-      * FM (x direction)
+      * FM (x direction, 1sub)
   * 2D
     * Square
-      * AF (z direction)
-      * AF (x direction)
+      * AF (z direction, 2x1sub)
+      * AF (x direction, 2x1sub)
+    * Triangular
+      * 120 Neel (xy plane, 3x1sub)
     * Honeycomb
-      * AF (z direction)
+      * AF (z direction, 2x1sub)
 
 ## Useful references
 
