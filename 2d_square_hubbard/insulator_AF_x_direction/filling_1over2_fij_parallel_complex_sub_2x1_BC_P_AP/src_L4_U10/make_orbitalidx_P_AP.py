@@ -22,15 +22,16 @@ def print_header(output_file,Nidx):
     f.write('========================\n')
     f.close()
 
-def get_sub(x,y,Lsub):
+def get_sub(x,y,Lsub,Ly):
     return (x+y)%Lsub
+#    return (x-y+Ly)%Lsub
 
 def calc_idxud(Lx,Ly,Lsub):
     indud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     sgnud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     for iy in range(Ly):
         for ix in range(Lx):
-            sub = get_sub(ix,iy,Lsub)
+            sub = get_sub(ix,iy,Lsub,Ly)
             sitei = Lx*iy + ix
             for jy in range(Ly):
                 for jx in range(Lx):
@@ -46,6 +47,7 @@ def calc_idxud(Lx,Ly,Lsub):
 def calc_preidx(Lx,Ly,Lsub):
     bignegative = -Lx*Ly*Lsub*100
     preind = np.zeros((Lsub,Lx*Ly),dtype=int)
+    presgn = np.zeros((Lsub,Lx*Ly),dtype=int)
     cnt = 0
     for iy in range(1):
         for ix in range(Lsub):
@@ -56,6 +58,7 @@ def calc_preidx(Lx,Ly,Lsub):
                     sitediff = Lx*((jy-iy+Ly)%Ly) + (jx-ix+Lx)%Lx
                     if sitej > sitei:
                         preind[sitei,sitediff] = cnt
+                        presgn[sitei,sitediff] = 1
                         cnt += 1
                     else:
                         preind[sitei,sitediff] = bignegative
@@ -68,16 +71,17 @@ def calc_preidx(Lx,Ly,Lsub):
                     sitediff = Lx*((jy-iy+Ly)%Ly) + (jx-ix+Lx)%Lx
                     sitediffrev = Lx*((iy-jy+Ly)%Ly) + (ix-jx+Lx)%Lx
                     if sitej < sitei:
-                        preind[sitei,sitediff] = preind[sitei,sitediffrev]
-    return preind
+                        preind[sitei,sitediff] = preind[sitej,sitediffrev]
+                        presgn[sitei,sitediff] = -1
+    return preind, presgn
 
-def calc_idxss(Lx,Ly,Lsub,preind,Nshift):
+def calc_idxss(Lx,Ly,Lsub,preind,presgn,Nshift):
     bignegative = -Lx*Ly*Lsub*100
     indss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     sgnss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     for iy in range(Ly):
         for ix in range(Lx):
-            sub = get_sub(ix,iy,Lsub)
+            sub = get_sub(ix,iy,Lsub,Ly)
             sitei = Lx*iy + ix
             for jy in range(Ly):
                 for jx in range(Lx):
@@ -86,9 +90,9 @@ def calc_idxss(Lx,Ly,Lsub,preind,Nshift):
                     if sitej > sitei:
                         if preind[sub,sitediff]<0: print("WRONG (sitei,sitej,sub,sitediff)",sitei,sitej,sub,sitediff)
                         indss[sitei,sitej] = preind[sub,sitediff] + Nshift
-                        sgn = +1
+                        sgn = presgn[sub,sitediff]
                         if iy>jy:
-                            sgn = -1
+                            sgn *= -1
                         sgnss[sitei,sitej] = sgn
                     else:
                         indss[sitei,sitej] = bignegative
@@ -138,12 +142,12 @@ def main():
     indud, sgnud = calc_idxud(Lx,Ly,Lsub)
 #    print(indud)
 #    print(sgnud)
-    preind = calc_preidx(Lx,Ly,Lsub)
+    preind, presgn = calc_preidx(Lx,Ly,Lsub)
 #    print(preind)
-    induu, sgnuu = calc_idxss(Lx,Ly,Lsub,preind,Nud)
+    induu, sgnuu = calc_idxss(Lx,Ly,Lsub,preind,presgn,Nud)
 #    print(induu)
 #    print(sgnuu)
-    inddd, sgndd = calc_idxss(Lx,Ly,Lsub,preind,Nud+Nuu)
+    inddd, sgndd = calc_idxss(Lx,Ly,Lsub,preind,presgn,Nud+Nuu)
 #    print(inddd)
 #    print(sgndd)
 

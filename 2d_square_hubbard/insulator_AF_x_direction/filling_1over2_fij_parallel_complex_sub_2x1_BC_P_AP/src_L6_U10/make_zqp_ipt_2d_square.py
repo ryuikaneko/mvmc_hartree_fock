@@ -277,13 +277,13 @@ def calc_fiyixjyjx(list_kx,list_ky,Lx,Ly,Lsub,Lspin,fk,Qx,Qy):
                                 spin1 = 0 if (orb1==0 or orb1==3) else 1
                                 Q1x = Qx*sub1
                                 Q1y = Qy*sub1
-                                KRi = (kx+Q1x)*ix + (ky+Q1x)*iy
+                                KRi = (kx+Q1x)*ix + (ky+Q1y)*iy
                                 for orb2 in range(Lsub*Lspin):
                                     sub2 = orb2%Lsub
                                     spin2 = 0 if (orb2==0 or orb2==3) else 1
                                     Q2x = Qx*sub2
                                     Q2y = Qy*sub2
-                                    KRj = (kx+Q2x)*jx + (ky+Q2x)*jy
+                                    KRj = (kx-Q2x)*jx + (ky-Q2y)*jy
                                     fiyixjyjx[iy,ix,jy,jx,spin1,spin2] += fk[intkx,intky,orb1,orb2] * np.exp(-1j*( KRi-KRj ))
 #    fiyixjyjx[np.abs(fiyixjyjx)<1e-12] = 0.0
 #    return fiyixjyjx/Lx/Ly
@@ -310,15 +310,16 @@ def calc_sym_fiyixjyjx(Lx,Ly,fiyixjyjx):
 
 ##----
 
-def get_sub(x,y,Lsub):
+def get_sub(x,y,Lsub,Ly):
     return (x+y)%Lsub
+#    return (x-y+Ly)%Lsub
 
 def calc_idxud(Lx,Ly,Lsub):
     indud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     sgnud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     for iy in range(Ly):
         for ix in range(Lx):
-            sub = get_sub(ix,iy,Lsub)
+            sub = get_sub(ix,iy,Lsub,Ly)
             sitei = Lx*iy + ix
             for jy in range(Ly):
                 for jx in range(Lx):
@@ -334,6 +335,7 @@ def calc_idxud(Lx,Ly,Lsub):
 def calc_preidx(Lx,Ly,Lsub):
     bignegative = -Lx*Ly*Lsub*100
     preind = np.zeros((Lsub,Lx*Ly),dtype=int)
+    presgn = np.zeros((Lsub,Lx*Ly),dtype=int)
     cnt = 0
     for iy in range(1):
         for ix in range(Lsub):
@@ -344,6 +346,7 @@ def calc_preidx(Lx,Ly,Lsub):
                     sitediff = Lx*((jy-iy+Ly)%Ly) + (jx-ix+Lx)%Lx
                     if sitej > sitei:
                         preind[sitei,sitediff] = cnt
+                        presgn[sitei,sitediff] = 1
                         cnt += 1
                     else:
                         preind[sitei,sitediff] = bignegative
@@ -356,16 +359,17 @@ def calc_preidx(Lx,Ly,Lsub):
                     sitediff = Lx*((jy-iy+Ly)%Ly) + (jx-ix+Lx)%Lx
                     sitediffrev = Lx*((iy-jy+Ly)%Ly) + (ix-jx+Lx)%Lx
                     if sitej < sitei:
-                        preind[sitei,sitediff] = preind[sitei,sitediffrev]
-    return preind
+                        preind[sitei,sitediff] = preind[sitej,sitediffrev]
+                        presgn[sitei,sitediff] = -1
+    return preind, presgn
 
-def calc_idxss(Lx,Ly,Lsub,preind,Nshift):
+def calc_idxss(Lx,Ly,Lsub,preind,presgn,Nshift):
     bignegative = -Lx*Ly*Lsub*100
     indss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     sgnss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
     for iy in range(Ly):
         for ix in range(Lx):
-            sub = get_sub(ix,iy,Lsub)
+            sub = get_sub(ix,iy,Lsub,Ly)
             sitei = Lx*iy + ix
             for jy in range(Ly):
                 for jx in range(Lx):
@@ -374,9 +378,9 @@ def calc_idxss(Lx,Ly,Lsub,preind,Nshift):
                     if sitej > sitei:
                         if preind[sub,sitediff]<0: print("WRONG (sitei,sitej,sub,sitediff)",sitei,sitej,sub,sitediff)
                         indss[sitei,sitej] = preind[sub,sitediff] + Nshift
-                        sgn = +1
+                        sgn = presgn[sub,sitediff]
                         if iy>jy:
-                            sgn = -1
+                            sgn *= -1
                         sgnss[sitei,sitej] = sgn
                     else:
                         indss[sitei,sitej] = bignegative
@@ -490,12 +494,12 @@ def main():
     indud, sgnud = calc_idxud(Lx,Ly,Lsub)
 #    print(indud)
 #    print(sgnud)
-    preind = calc_preidx(Lx,Ly,Lsub)
+    preind, presgn = calc_preidx(Lx,Ly,Lsub)
 #    print(preind)
-    induu, sgnuu = calc_idxss(Lx,Ly,Lsub,preind,Nud)
+    induu, sgnuu = calc_idxss(Lx,Ly,Lsub,preind,presgn,Nud)
 #    print(induu)
 #    print(sgnuu)
-    inddd, sgndd = calc_idxss(Lx,Ly,Lsub,preind,Nud+Nuu)
+    inddd, sgndd = calc_idxss(Lx,Ly,Lsub,preind,presgn,Nud+Nuu)
 #    print(inddd)
 #    print(sgndd)
 
@@ -519,7 +523,8 @@ def main():
 
 
     print("")
-    print("all nonzero fiyixjyjx (without sign)")
+#    print("all nonzero fiyixjyjx (without sign)")
+    print("all nonzero fiyixjyjx (with sign)")
 #    print("ud")
 #    for iy in range(Ly):
 #        for ix in range(Lx):
@@ -552,7 +557,8 @@ def main():
             for jy in range(Ly):
                 for jx in range(Lx):
                     j = Lx*jy + jx
-                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx],indud[i,j])
+#                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx],indud[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx]*sgnud[i,j],indud[i,j])
     print("----")
     print("(uu_ij-uu_ji)/2")
     for iy in range(Ly):
@@ -561,7 +567,8 @@ def main():
             for jy in range(Ly):
                 for jx in range(Lx):
                     j = Lx*jy + jx
-                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx],induu[i,j])
+#                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx],induu[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx]*sgnuu[i,j],induu[i,j])
     print("----")
     print("(dd_ij-dd_ji)/2")
     for iy in range(Ly):
@@ -570,7 +577,8 @@ def main():
             for jy in range(Ly):
                 for jx in range(Lx):
                     j = Lx*jy + jx
-                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx],inddd[i,j])
+#                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx],inddd[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx]*sgndd[i,j],inddd[i,j])
 
 
 ## write wave functions
