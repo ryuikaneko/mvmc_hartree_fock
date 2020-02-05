@@ -1,0 +1,25 @@
+f1(x)=+2.0/3+x
+f2(x)=-2.0/3+x
+f3(x)=+5.0/6-x/2
+f4(x)=-5.0/6-x/2
+f5(x)=+5.0/3-2*x
+f6(x)=-5.0/3-2*x
+
+set size square
+set xrange [-1.1:1.1]
+set yrange [-1.1:1.1]
+
+#L=6
+L=12
+size=0.8/L
+
+p \
+f1(x) w l ls -1 ti "", \
+f2(x) w l ls -1 ti "", \
+f3(x) w l ls -1 ti "", \
+f4(x) w l ls -1 ti "", \
+f5(x) w l ls -1 ti "", \
+f6(x) w l ls -1 ti "", \
+"< grep '## BZ' dat_exact_U | sed 's/## BZ//g' | awk '$5==0{print $0}'" u ($3/pi):($4/pi):(size) w circ lc 1 ti "", \
+"< grep '## BZ' dat_exact_U | sed 's/## BZ//g' | awk '$5==1{print $0}'" u ($3/pi):($4/pi):(size) w circ lc 3 ti ""
+pause -1

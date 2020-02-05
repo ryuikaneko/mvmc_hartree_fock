@@ -4,6 +4,7 @@
 from __future__ import print_function
 import numpy as np
 import argparse
+from numba import jit
 
 def parse_args():
     parser = argparse.ArgumentParser(description='prepare zqp_ipt.def')
@@ -19,6 +20,7 @@ def parse_args():
     parser.add_argument('-NPj',metavar='NPj',dest='NPj',type=int,default=0,help='set NPj')
     return parser.parse_args()
 
+##@jit(nopython=True)
 def ene(kx,ky,U,n,m,Qx,Qy):
     def tb_ene(kx,ky):
         return -2.0*(np.cos(kx)+np.cos(ky)+np.cos(kx-ky))
@@ -47,6 +49,7 @@ def ene(kx,ky,U,n,m,Qx,Qy):
 #    print(kx,ky,ene0,vec0)
     return ene0, vec0.transpose(1,0)
 
+##@jit(nopython=True)
 def calc_k(Lx,Ly,BCx,BCy):
     if BCx == 'AP' or BCx == 'antiperiodic':
         xshift = 0.5
@@ -96,6 +99,11 @@ def calc_k(Lx,Ly,BCx,BCy):
     list_RBZ_ind = []
     list_RBZ_ik2ind = np.array([-1 for i in range(Lx*Ly)])
     ind = 0
+#----
+#----
+    eps_RBZ = 1e-10
+    Ne_RBZ = Lx*Ly//3
+#----
     for ix in range(len(list_kx)):
         for iy in range(len(list_ky)):
             kx = list_kx[ix]
@@ -104,14 +112,15 @@ def calc_k(Lx,Ly,BCx,BCy):
             iky = list_iky[iy]
             mikx = list_mikx[ix]
             miky = list_miky[iy]
-#
+#----
             if \
-                kx - ky < + np.pi*2.0/3.0 + 1e-10 and \
-                kx - ky > - np.pi*2.0/3.0 - 1e-10 and \
-                kx + 2.0*ky < + np.pi*5.0/3.0 + 1e-10 and \
-                kx + 2.0*ky > - np.pi*5.0/3.0 - 1e-10 and \
-                2.0*kx + ky < + np.pi*5.0/3.0 + 1e-10 and \
-                2.0*kx + ky > - np.pi*5.0/3.0 - 1e-10 :
+                kx - ky < + np.pi*2.0/3.0 - eps_RBZ and \
+                kx - ky > - np.pi*2.0/3.0 + eps_RBZ and \
+                kx + 2.0*ky < + np.pi*5.0/3.0 - eps_RBZ and \
+                kx + 2.0*ky > - np.pi*5.0/3.0 + eps_RBZ and \
+                2.0*kx + ky < + np.pi*5.0/3.0 - eps_RBZ and \
+                2.0*kx + ky > - np.pi*5.0/3.0 + eps_RBZ and \
+                ky < 0 and ind < Ne_RBZ:
 #
                 list_RBZ_kx.append(kx)
                 list_RBZ_ky.append(ky)
@@ -122,6 +131,70 @@ def calc_k(Lx,Ly,BCx,BCy):
                 list_RBZ_ind.append(ind)
                 list_RBZ_ik2ind[iky*Lx+ikx] = ind
                 ind += 1
+#
+                list_RBZ_kx.append(-kx)
+                list_RBZ_ky.append(-ky)
+                list_RBZ_ikx.append(mikx)
+                list_RBZ_iky.append(miky)
+                list_RBZ_mikx.append(ikx)
+                list_RBZ_miky.append(iky)
+                list_RBZ_ind.append(ind)
+                list_RBZ_ik2ind[miky*Lx+mikx] = ind
+                ind += 1
+#
+                print("## BZ {} {} {} {} {}".format(ikx,iky,kx,ky,1))
+                print("## BZ {} {} {} {} {}".format(mikx,miky,-kx,-ky,1))
+#----
+    for ix in range(len(list_kx)):
+        for iy in range(len(list_ky)):
+            kx = list_kx[ix]
+            ky = list_ky[iy]
+            ikx = list_ikx[ix]
+            iky = list_iky[iy]
+            mikx = list_mikx[ix]
+            miky = list_miky[iy]
+#----
+            if \
+                ( kx - ky < + np.pi*2.0/3.0 + eps_RBZ and \
+                kx - ky > - np.pi*2.0/3.0 - eps_RBZ and \
+                kx + 2.0*ky < + np.pi*5.0/3.0 + eps_RBZ and \
+                kx + 2.0*ky > - np.pi*5.0/3.0 - eps_RBZ and \
+                2.0*kx + ky < + np.pi*5.0/3.0 + eps_RBZ and \
+                2.0*kx + ky > - np.pi*5.0/3.0 - eps_RBZ ) and \
+                ( np.abs(kx - ky - np.pi*2.0/3.0) < eps_RBZ or \
+                np.abs(kx - ky + np.pi*2.0/3.0) < eps_RBZ or \
+                np.abs(kx + 2.0*ky - np.pi*5.0/3.0) < eps_RBZ or \
+                np.abs(kx + 2.0*ky + np.pi*5.0/3.0) < eps_RBZ or \
+                np.abs(2.0*kx + ky - np.pi*5.0/3.0) < eps_RBZ or \
+                np.abs(2.0*kx + ky + np.pi*5.0/3.0) < eps_RBZ ) and \
+                ky < 0 and ind < Ne_RBZ:
+#
+                list_RBZ_kx.append(kx)
+                list_RBZ_ky.append(ky)
+                list_RBZ_ikx.append(ikx)
+                list_RBZ_iky.append(iky)
+                list_RBZ_mikx.append(mikx)
+                list_RBZ_miky.append(miky)
+                list_RBZ_ind.append(ind)
+                list_RBZ_ik2ind[iky*Lx+ikx] = ind
+                ind += 1
+#
+                list_RBZ_kx.append(-kx)
+                list_RBZ_ky.append(-ky)
+                list_RBZ_ikx.append(mikx)
+                list_RBZ_iky.append(miky)
+                list_RBZ_mikx.append(ikx)
+                list_RBZ_miky.append(iky)
+                list_RBZ_ind.append(ind)
+                list_RBZ_ik2ind[miky*Lx+mikx] = ind
+                ind += 1
+#
+                print("## BZ {} {} {} {} {}".format(ikx,iky,kx,ky,1))
+                print("## BZ {} {} {} {} {}".format(mikx,miky,-kx,-ky,1))
+#----
+            print("## BZ {} {} {} {} {}".format(ikx,iky,kx,ky,0))
+#----
+#----
     list_RBZ_kx = np.array(list_RBZ_kx)
     list_RBZ_ky = np.array(list_RBZ_ky)
     list_RBZ_ikx = np.array(list_RBZ_ikx)
@@ -147,6 +220,7 @@ def calc_k(Lx,Ly,BCx,BCy):
         list_RBZ_ik, list_RBZ_mik, list_RBZ_ind, list_RBZ_ik2ind, \
         xshift, yshift, LRBZsize
 
+##@jit(nopython=True)
 def calc_k_ene(Lx,Ly,Lsub,Lspin,LRBZsize,BCx,BCy,list_RBZ_kx,list_RBZ_ky,U,n,m,Qx,Qy):
     list_enekxky, list_veckxky = zip(*[ene(kx,ky,U,n,m,Qx,Qy) for (kx,ky) in zip(list_RBZ_kx,list_RBZ_ky)])
     list_enekxky = np.array(list_enekxky).reshape([Lsub*Lspin*LRBZsize])
@@ -160,6 +234,7 @@ def calc_k_ene(Lx,Ly,Lsub,Lspin,LRBZsize,BCx,BCy,list_RBZ_kx,list_RBZ_ky,U,n,m,Q
 #    print("list_intkxky",list_intkxky)
     return list_enekxky, list_veckxky, list_intkxky
 
+##@jit(nopython=True)
 def calc_mean_field(Lx,Ly,Lsub,Lspin,LRBZsize,BCx,BCy,filling_numer,filling_denom,list_kx,list_ky,U,num,Qx,Qy):
     filling = float(filling_numer)/float(filling_denom)
     numel = LRBZsize*Lsub*Lspin*filling_numer//filling_denom
@@ -189,6 +264,7 @@ def calc_mean_field(Lx,Ly,Lsub,Lspin,LRBZsize,BCx,BCy,filling_numer,filling_deno
     return filling, numel, chemipo, totene, gap, shellcond, \
         list_sorted_enekxky, list_sorted_veckxky, list_sorted_intkxky, num
 
+##@jit(nopython=True)
 def calc_fk(Lx,Ly,Lsub,Lspin,xshift,yshift,numel,list_intkxky,list_veckxky,list_RBZ_kx,list_RBZ_ky,\
     list_RBZ_ikx,list_RBZ_iky,list_RBZ_mikx,list_RBZ_miky,list_RBZ_ik,list_RBZ_mik,list_RBZ_ind,list_RBZ_ik2ind,list_kx,list_ky):
     print("numel",numel)
@@ -282,6 +358,7 @@ def calc_fk(Lx,Ly,Lsub,Lspin,xshift,yshift,numel,list_intkxky,list_veckxky,list_
             print("----")
     return fk
 
+@jit(nopython=True)
 def calc_fiyixjyjx(list_kx,list_ky,Lx,Ly,Lsub,Lspin,fk,Qx,Qy):
     fiyixjyjx = np.zeros((Ly,Lx,Ly,Lx,Lspin,Lspin),dtype=np.complex128)
     for intkx in range(len(list_kx)):
@@ -313,6 +390,7 @@ def calc_fiyixjyjx(list_kx,list_ky,Lx,Ly,Lsub,Lspin,fk,Qx,Qy):
 #    return fiyixjyjx/Lx/Ly
     return fiyixjyjx*8.0/Lx/Ly
 
+@jit(nopython=True)
 def calc_sym_fiyixjyjx(Lx,Ly,fiyixjyjx):
     fiyixjyjx01 = np.zeros((Ly,Lx,Ly,Lx),dtype=np.complex128)
     fiyixjyjx00 = np.zeros((Ly,Lx,Ly,Lx),dtype=np.complex128)
@@ -334,13 +412,15 @@ def calc_sym_fiyixjyjx(Lx,Ly,fiyixjyjx):
 
 ##----
 
+@jit(nopython=True)
 def get_sub(x,y,Lsub,Ly):
 #    return (x+y)%Lsub
     return (x-y+Ly)%Lsub
 
+@jit(nopython=True)
 def calc_idxud(Lx,Ly,Lsub):
-    indud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
-    sgnud = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
+    indud = np.zeros((Lx*Ly,Lx*Ly),dtype=np.int64)
+    sgnud = np.zeros((Lx*Ly,Lx*Ly),dtype=np.int64)
     for iy in range(Ly):
         for ix in range(Lx):
             sub = get_sub(ix,iy,Lsub,Ly)
@@ -356,10 +436,11 @@ def calc_idxud(Lx,Ly,Lsub):
                     sgnud[sitei,sitej] = sgn
     return indud, sgnud
 
+@jit(nopython=True)
 def calc_preidx(Lx,Ly,Lsub):
     bignegative = -Lx*Ly*Lsub*100
-    preind = np.zeros((Lsub,Lx*Ly),dtype=int)
-    presgn = np.zeros((Lsub,Lx*Ly),dtype=int)
+    preind = np.zeros((Lsub,Lx*Ly),dtype=np.int64)
+    presgn = np.zeros((Lsub,Lx*Ly),dtype=np.int64)
     cnt = 0
     for iy in range(1):
         for ix in range(Lsub):
@@ -387,10 +468,11 @@ def calc_preidx(Lx,Ly,Lsub):
                         presgn[sitei,sitediff] = -1
     return preind, presgn
 
+@jit(nopython=True)
 def calc_idxss(Lx,Ly,Lsub,preind,presgn,Nshift):
     bignegative = -Lx*Ly*Lsub*100
-    indss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
-    sgnss = np.zeros((Lx*Ly,Lx*Ly),dtype=int)
+    indss = np.zeros((Lx*Ly,Lx*Ly),dtype=np.int64)
+    sgnss = np.zeros((Lx*Ly,Lx*Ly),dtype=np.int64)
     for iy in range(Ly):
         for ix in range(Lx):
             sub = get_sub(ix,iy,Lsub,Ly)
@@ -410,6 +492,86 @@ def calc_idxss(Lx,Ly,Lsub,preind,presgn,Nshift):
                         indss[sitei,sitej] = bignegative
                         sgnss[sitei,sitej] = bignegative
     return indss, sgnss
+
+##----
+
+@jit(nopython=True)
+def calc_vmcfij(Lx,Ly,Nidx,fiyixjyjx01,fiyixjyjx00,fiyixjyjx11,indud,induu,inddd,sgnud,sgnuu,sgndd):
+    Ns = Lx*Ly
+    vmcfij = np.zeros(Nidx,dtype=np.complex128)
+    for iy in range(Ly):
+        for ix in range(Lx):
+            i = Lx*iy + ix
+            for jy in range(Ly):
+                for jx in range(Lx):
+                    j = Lx*jy + jx
+                    ## multiply fij with sign (P-AP boundary condition)
+                    if indud[i,j] >=0:
+                        vmcfij[indud[i,j]] = fiyixjyjx01[iy,ix,jy,jx] * sgnud[i,j]
+                    if induu[i,j] >=0:
+                        vmcfij[induu[i,j]] = fiyixjyjx00[iy,ix,jy,jx] * sgnuu[i,j]
+                    if inddd[i,j] >=0:
+                        vmcfij[inddd[i,j]] = fiyixjyjx11[iy,ix,jy,jx] * sgndd[i,j]
+#
+    print("")
+#    print("all nonzero fiyixjyjx (without sign)")
+    print("all nonzero fiyixjyjx (with sign)")
+#    print("ud")
+#    for iy in range(Ly):
+#        for ix in range(Lx):
+#            for jy in range(Ly):
+#                for jx in range(Lx):
+#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,0,1])
+#    print("du")
+#    for iy in range(Ly):
+#        for ix in range(Lx):
+#            for jy in range(Ly):
+#                for jx in range(Lx):
+#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,1,0])
+#    print("uu")
+#    for iy in range(Ly):
+#        for ix in range(Lx):
+#            for jy in range(Ly):
+#                for jx in range(Lx):
+#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,0,0])
+#    print("dd")
+#    for iy in range(Ly):
+#        for ix in range(Lx):
+#            for jy in range(Ly):
+#                for jx in range(Lx):
+#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,1,1])
+    print("----")
+    print("(ud_ij-du_ji)/2")
+    for iy in range(Ly):
+        for ix in range(Lx):
+            i = Lx*iy + ix
+            for jy in range(Ly):
+                for jx in range(Lx):
+                    j = Lx*jy + jx
+#                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx],indud[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx]*sgnud[i,j],indud[i,j])
+    print("----")
+    print("(uu_ij-uu_ji)/2")
+    for iy in range(Ly):
+        for ix in range(Lx):
+            i = Lx*iy + ix
+            for jy in range(Ly):
+                for jx in range(Lx):
+                    j = Lx*jy + jx
+#                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx],induu[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx]*sgnuu[i,j],induu[i,j])
+    print("----")
+    print("(dd_ij-dd_ji)/2")
+    for iy in range(Ly):
+        for ix in range(Lx):
+            i = Lx*iy + ix
+            for jy in range(Ly):
+                for jx in range(Lx):
+                    j = Lx*jy + jx
+#                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx],inddd[i,j])
+                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx]*sgndd[i,j],inddd[i,j])
+#
+    return vmcfij
 
 ##----
 
@@ -478,6 +640,9 @@ def main():
             break
         num = num*mixkeep + numnew*(1.0-mixkeep)
         diff = np.sum(np.abs(numnew-num))/Lsub/Lspin
+    n = (num[0,0]+num[1,1]+num[2,2]+num[3,3]+num[4,4]+num[5,5]).real
+    m = (0.5*(num[0,1]+num[1,0]+num[2,3]+num[3,2]+num[4,5]+num[5,4])).real
+    file.write("# n m {} {}\n".format(n,m))
     file.close()
 
     print("list_enekxky",list_enekxky)
@@ -486,8 +651,6 @@ def main():
     print(" >= numel",list_enekxky[numel:])
 
 ## calculate shifted energy of Hartree-Fock approximation
-    n = (num[0,0]+num[1,1]+num[2,2]+num[3,3]+num[4,4]+num[5,5]).real
-    m = (0.5*(num[0,1]+num[1,0]+num[2,3]+num[3,2]+num[4,5]+num[5,4])).real
     eneU = (U*(0.25*n**2-m**2)).real
 
 ## write results of Hartree-Fock approximation
@@ -519,6 +682,7 @@ def main():
     Nud = Lsub*Lx*Ly
     Nuu = Lsub*Lx*Ly - Lsub*(Lsub+1)//2
     Ndd = Lsub*Lx*Ly - Lsub*(Lsub+1)//2
+    Nidx = Nud + Nuu + Ndd
 #
     indud, sgnud = calc_idxud(Lx,Ly,Lsub)
 #    print(indud)
@@ -531,83 +695,8 @@ def main():
     inddd, sgndd = calc_idxss(Lx,Ly,Lsub,preind,presgn,Nud+Nuu)
 #    print(inddd)
 #    print(sgndd)
-
-
-    Nidx = Nud + Nuu + Ndd
-    Ns = Lx*Ly
-    vmcfij = np.zeros(Nidx,dtype=np.complex128)
-    for iy in range(Ly):
-        for ix in range(Lx):
-            i = Lx*iy + ix
-            for jy in range(Ly):
-                for jx in range(Lx):
-                    j = Lx*jy + jx
-                    ## multiply fij with sign (P-AP boundary condition)
-                    if indud[i,j] >=0:
-                        vmcfij[indud[i,j]] = fiyixjyjx01[iy,ix,jy,jx] * sgnud[i,j]
-                    if induu[i,j] >=0:
-                        vmcfij[induu[i,j]] = fiyixjyjx00[iy,ix,jy,jx] * sgnuu[i,j]
-                    if inddd[i,j] >=0:
-                        vmcfij[inddd[i,j]] = fiyixjyjx11[iy,ix,jy,jx] * sgndd[i,j]
-
-
-    print("")
-#    print("all nonzero fiyixjyjx (without sign)")
-    print("all nonzero fiyixjyjx (with sign)")
-#    print("ud")
-#    for iy in range(Ly):
-#        for ix in range(Lx):
-#            for jy in range(Ly):
-#                for jx in range(Lx):
-#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,0,1])
-#    print("du")
-#    for iy in range(Ly):
-#        for ix in range(Lx):
-#            for jy in range(Ly):
-#                for jx in range(Lx):
-#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,1,0])
-#    print("uu")
-#    for iy in range(Ly):
-#        for ix in range(Lx):
-#            for jy in range(Ly):
-#                for jx in range(Lx):
-#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,0,0])
-#    print("dd")
-#    for iy in range(Ly):
-#        for ix in range(Lx):
-#            for jy in range(Ly):
-#                for jx in range(Lx):
-#                    print(iy,ix,jy,jx,fiyixjyjx[iy,ix,jy,jx,1,1])
-    print("----")
-    print("(ud_ij-du_ji)/2")
-    for iy in range(Ly):
-        for ix in range(Lx):
-            i = Lx*iy + ix
-            for jy in range(Ly):
-                for jx in range(Lx):
-                    j = Lx*jy + jx
-#                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx],indud[i,j])
-                    print(iy,ix,jy,jx,fiyixjyjx01[iy,ix,jy,jx]*sgnud[i,j],indud[i,j])
-    print("----")
-    print("(uu_ij-uu_ji)/2")
-    for iy in range(Ly):
-        for ix in range(Lx):
-            i = Lx*iy + ix
-            for jy in range(Ly):
-                for jx in range(Lx):
-                    j = Lx*jy + jx
-#                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx],induu[i,j])
-                    print(iy,ix,jy,jx,fiyixjyjx00[iy,ix,jy,jx]*sgnuu[i,j],induu[i,j])
-    print("----")
-    print("(dd_ij-dd_ji)/2")
-    for iy in range(Ly):
-        for ix in range(Lx):
-            i = Lx*iy + ix
-            for jy in range(Ly):
-                for jx in range(Lx):
-                    j = Lx*jy + jx
-#                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx],inddd[i,j])
-                    print(iy,ix,jy,jx,fiyixjyjx11[iy,ix,jy,jx]*sgndd[i,j],inddd[i,j])
+#
+    vmcfij = calc_vmcfij(Lx,Ly,Nidx,fiyixjyjx01,fiyixjyjx00,fiyixjyjx11,indud,induu,inddd,sgnud,sgnuu,sgndd)
 
 
 ## write wave functions

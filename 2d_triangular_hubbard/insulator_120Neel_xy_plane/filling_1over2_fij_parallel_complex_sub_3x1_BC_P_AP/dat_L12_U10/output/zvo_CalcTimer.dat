@@ -1,0 +1,51 @@
+All                         [0]   3562.27706
+Initialization              [1]      0.30372
+  read options             [10]      0.00028
+  ReadDefFile              [11]      0.04735
+  SetMemory                [12]      0.00144
+  InitParameter            [13]      0.00201
+VMCParaOpt                  [2]   3561.97333
+  VMCMakeSample             [3]   3184.48064
+    makeInitialSample      [30]      0.02867
+    make candidate         [31]      2.68066
+    hopping update         [32]    293.59167
+      UpdateProjCnt        [60]      7.01222
+      CalculateNewPfM2     [61]     16.56462
+      CalculateLogIP       [62]      4.05316
+      UpdateMAll           [63]    262.20925
+    exchange update        [33]   2757.32201
+      UpdateProjCnt        [65]     18.16139
+      CalculateNewPfMTwo2  [66]    205.70234
+      CalculateLogIP       [67]      4.70103
+      UpdateMAllTwo        [68]   2523.28078
+    lspinflip update       [36]      0.00000
+      UpdateProjCnt       [600]      0.00000
+      CalculateNewPfMTwo2 [601]      0.00000
+      CalculateLogIP      [602]      0.00000
+      UpdateMAllTwo       [603]      0.00000
+    recal PfM and InvM     [34]    127.76065
+    save electron config   [35]      0.18065
+  VMCMainCal                [4]    375.45174
+    CalculateMAll          [40]    177.52495
+    LocEnergyCal           [41]     76.58900
+      CalHamiltonian0      [70]      0.17323
+      CalHamiltonian1      [71]     75.84689
+      CalHamiltonian2      [72]      0.03232
+    ReturnSlaterElmDiff    [42]     26.72600
+    calculate OO and HO    [43]      1.27236
+    multiply store OO      [45]     92.91884
+  StochasticOpt             [5]      1.88587
+    preprocess             [50]      0.00059
+    stcOptMain             [51]      1.88470
+      initBLACS            [55]      0.00000
+      calculate S and g    [56]      0.00000
+      DPOSV                [57]      0.00000
+      gatherParaChange     [58]      0.00000
+    postprocess            [52]      0.00050
+  UpdateSlaterElm          [20]      0.00656
+  WeightAverage            [21]      0.13259
+  outputData               [22]      0.01067
+  SyncModifiedParameter    [23]      0.00036
+  cal                      [24]      0.19557
+  SR                       [25]      0.13236
+  MAll                     [69]      0.00000
