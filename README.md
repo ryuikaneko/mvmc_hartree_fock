@@ -56,4 +56,5 @@
       [Jayaprakash-Krishnamurthy-Sarker-Wenzel DOI:10.1209/0295-5075/15/6/011](https://doi.org/10.1209/0295-5075/15/6/011),
       [Krishnamurthy-Jayaprakash-Sarker-Wenzel DOI:10.1103/PhysRevLett.64.950](https://doi.org/10.1103/PhysRevLett.64.950),
       [Capone-Capriotti-Becca-Caprara DOI:10.1103/PhysRevB.63.085104](https://doi.org/10.1103/PhysRevB.63.085104),
+      [Satoh-Ozaki-Maruyama-Tomita DOI:10.1103/PhysRevB.84.245101](https://doi.org/10.1103/PhysRevB.84.245101),
       [Chern-Barros-Wang-Suwa-Batista DOI:10.1103/PhysRevB.97.035120](https://doi.org/10.1103/PhysRevB.97.035120)
